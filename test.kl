@@ -1,0 +1,50 @@
+PROGRAM TEST
+----------------------------------------------------
+-- Creation date: 2020.04.21
+-- Created by: 
+----------------------------------------------------
+-- Version: 0.0.0.0 - 00
+----------------------------------------------------
+-- Function: 
+----------------------------------------------------
+-- Last modified: 2020.04.21
+-- Last modified by:                              
+----------------------------------------------------
+-- %COMMENT = '0.0.0.0 - 00'
+-- %ALPHABETIZE
+-- %NOABORT = ERROR+COMMAND+TPENABLE
+-- %NOPAUSE = ERROR+COMMAND+TPENABLE
+-- %NOPAUSESHFT
+-- %NOLOCKGROUP
+-- %NOBUSYLAMP
+-- %CMOSVARS
+-- %CMOS2SHADOW
+-- %SHADOWVARS
+-- %INCLUDE KLEVKEYS
+-- %INCLUDE KLEVKMSK
+-- %INCLUDE KLEVCCDF
+-- %INCLUDE KLIOUOP
+-- %INCLUDE KLIOTYPS
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+--CONST
+%INCLUDE errc
+%INCLUDE filec
+%INCLUDE strc 
+%INCLUDE panec 
+%INCLUDE vartype 
+--TYPE
+----------------------------------------------------
+-- VARIABLES                                        
+----------------------------------------------------
+--VAR
+----------------------------------------------------
+-- ROUTINES                                         
+----------------------------------------------------
+----------------------------------------------------
+-- BEGIN TEST                             
+----------------------------------------------------
+BEGIN
+    
+END TEST

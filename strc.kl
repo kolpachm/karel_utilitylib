@@ -1,0 +1,24 @@
+----------------------------------------------------
+-- Creation date: 2020.04.21
+-- Created by: MKOL
+----------------------------------------------------
+-- Version: 2.0.0.0 - 00
+----------------------------------------------------
+-- Function: string constants
+----------------------------------------------------
+-- Last modified: 2020.04.21
+-- Last modified by:                              
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+CONST
+-- Strings:
+NULLSTR      =''
+CSVSEP       =','
+-- spec chars
+CH_CLR           = 128 --clear win 
+CH_CR            = 132 --carriage return
+CH_HOME          = 137 --home cursor
+--ASCII char codes 
+ASC_LF         = 10
+ASC_CR         = 13

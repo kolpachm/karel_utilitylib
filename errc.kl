@@ -1,0 +1,33 @@
+----------------------------------------------------
+-- Creation date: 2020.04.21
+-- Created by: MKOL
+----------------------------------------------------
+-- Version: 2.0.0.0 - 00
+----------------------------------------------------
+-- Function: error severity const
+----------------------------------------------------
+-- Last modified: 2020.04.21
+-- Last modified by:                              
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+CONST
+    -- stat
+    SUCCESS         = 0
+    -- Error Severity:
+    SEV_WARN        = 0
+    SEV_PAUSE       = 1
+    SEV_ABORT       = 2
+    -- Error Prio
+    PRIO_LOW        = 0
+    PRIO_HIGH       = 2
+    PRIO_MID        = 1 
+    -- Err Codes
+    E_BADTYPE       = 16060 -- VARS060 Variable type is not compatible 
+    E_OUTOFRANGE    = 16028 -- VARS028 Variable out of Range
+    E_UNINIT        = 16213 -- VARS213 Variable unitialized
+    E_PORTNOTASGD   = 13042 -- PRIO042 Port Not Assigned
+    E_INVCHAR       = 22012 -- ASBN012 Invalid character   
+    E_POSNOTEXIST   = 7071  -- MEMO071 position does not exist
+    E_REGREADFAIL   = 12228 -- INTP228 Read register failed
+    

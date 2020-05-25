@@ -1,0 +1,721 @@
+PROGRAM utilitylib
+----------------------------------------------------
+-- Creation date: 2020.05.21
+-- Created by: MKOL
+----------------------------------------------------
+-- Version: 0.1.0.0 - 7DF1
+----------------------------------------------------
+-- Function: Utility Lib
+----------------------------------------------------
+-- Last modified: 2020.05.21
+-- Last modified by: MKOL                             
+----------------------------------------------------
+%COMMENT = '0.1.0.2 - 7DF1'
+-- %INCLUDE KLEVKEYS
+-- %INCLUDE KLEVKMSK
+%INCLUDE KLEVCCDF
+-- %INCLUDE KLIOUOP
+-- %INCLUDE KLIOTYPS
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+%INCLUDE errc
+%INCLUDE filec
+%INCLUDE ktype_sz_t
+%INCLUDE panec
+%INCLUDE strc
+%INCLUDE vartype
+----------------------------------------------------
+-- ROUTINES                                         
+----------------------------------------------------
+%INCLUDE utilitylib_h
+----------------------------------------------------
+-- BEGIN utilitylib                             
+----------------------------------------------------
+BEGIN
+END utilitylib 
+----------------------------------------------------
+-- TP DISP                             
+----------------------------------------------------
+ROUTINE ForceMenu --(menu_id:INTEGER)
+BEGIN
+    FORCE_SPMENU(tp_panel, menu_id, 1)
+END ForceMenu
+----------------------------------------------------
+ROUTINE ClearTpDev--(dispid:FILE)
+BEGIN
+    WRITE dispid(CHR(cc_clear_win),CHR(cc_home))
+END ClearTpDev
+----------------------------------------------------
+ROUTINE ForceUser
+BEGIN
+    ForceMenu(SPI_TPUSER)
+END ForceUser
+----------------------------------------------------
+ROUTINE ClearUser
+BEGIN
+    ClearTpDev(TPDISPLAY)
+END ClearUser
+----------------------------------------------------
+ROUTINE ClearErr
+BEGIN
+    ClearTpDev(TPERROR)
+END ClearErr
+----------------------------------------------------
+-- SYS VARS                             
+----------------------------------------------------
+-- This routine gets BOOLEAN type system variable and check operation status
+ROUTINE GetSysB--(varname: STRING): BOOLEAN
+VAR
+  result    :BOOLEAN
+  lEntry     :INTEGER
+  lStat     :INTEGER 
+BEGIN
+  GET_VAR(lEntry, '*SYSTEM*', varname, result, lStat)
+  IF (lStat<>0) THEN PostErr('Failed to read: ' + varname,PRIO_HIGH);ENDIF
+  RETURN(result)
+END GetSysB
+----------------------------------------------------------
+-- This routine gets INTEGER type system variable and check operation status
+ROUTINE GetSysI--(varname: STRING): INTEGER
+VAR
+  result    :INTEGER
+  lEntry     :INTEGER
+  lStat     :INTEGER 
+BEGIN
+  GET_VAR(lEntry, '*SYSTEM*', varname, result, lStat)
+  IF (lStat<>0) THEN PostErr('Failed to get: ' + varname,PRIO_HIGH);ENDIF
+  RETURN(result)
+END GetSysI
+----------------------------------------------------------
+-- This routine sets BOOLEAN type system variable and check operation status
+ROUTINE SetSysB--(varname: STRING; value: BOOLEAN)
+VAR 
+  lEntry     :INTEGER
+  lStat     :INTEGER 
+BEGIN
+  SET_VAR(lEntry, '*SYSTEM*', varname, value, lStat)
+  IF (lStat<>0) THEN PostErr('Failed to set: ' + varname,PRIO_HIGH);ENDIF
+END SetSysB
+----------------------------------------------------------
+-- This routine sets INTEGER type system variable and check operation status
+ROUTINE SetSysI--(varname: STRING; value: INTEGER)
+
+VAR 
+  lEntry       :INTEGER
+  lStat        :INTEGER 
+BEGIN
+  SET_VAR(lEntry, '*SYSTEM*', varname, value, lStat)
+  IF (lStat<>0) THEN PostErr('Failed to set: ' + varname,PRIO_HIGH);ENDIF
+END SetSysI
+----------------------------------------------------
+-- ERR Handling                             
+----------------------------------------------------
+ROUTINE PostErr --(message:STRING;prio:INTEGER)
+BEGIN 
+  ClearErr
+  WRITE TPERROR(message,CR)
+  SELECT (prio) OF
+    CASE(PRIO_MID):  PAUSE 
+    CASE(PRIO_HIGH): ABORT 
+  ELSE:
+  ENDSELECT
+END PostErr
+----------------------------------------------------
+----------------------------------------------------
+--   File
+----------------------------------------------------
+ROUTINE OpenFile  --(in_file:FILE; file_path:STRING; method:INTEGER):BOOLEAN
+
+VAR 
+ret_val          :BOOLEAN
+lStat            :INTEGER
+
+BEGIN
+  
+  ret_val = TRUE
+  
+  CLR_IO_STAT(in_file)
+  
+  SELECT (method) OF
+    CASE(F_RO)    : OPEN FILE in_file('RO',file_path) 
+    CASE(F_RW)    : OPEN FILE in_file('RW',file_path) 
+    CASE(F_AP)    : OPEN FILE in_file('AP',file_path) 
+  ELSE            : RETURN(FALSE)
+  ENDSELECT
+  lStat = IO_STATUS(in_file)
+  IF (lStat = SUCCESS) THEN 
+    RETURN(TRUE) 
+  ELSE
+    PostErr('Err open' + file_path,PRIO_LOW) 
+    RETURN(FALSE)
+  ENDIF
+END OpenFile
+---------------------------------------------------
+ROUTINE CloseFile --(in_file:FILE) :BOOLEAN
+VAR
+  lStat     :INTEGER
+BEGIN
+  CLOSE FILE in_file
+  lStat = IO_STATUS(in_file)
+  IF lStat = 0 THEN
+    RETURN (TRUE)
+  ELSE 
+    PostErr('Err closing file',PRIO_LOW)
+    RETURN (FALSE)
+  ENDIF 
+
+END CloseFile
+----------------------------------------------------
+ROUTINE Getline --(lFile:FILE;lLine:STRING) : BOOLEAN 
+BEGIN 
+    READ lFile(lLine)
+    IF IO_STATUS(lFile) = SUCCESS THEN
+        RETURN(TRUE)
+    ELSE
+        RETURN(FALSE)
+    ENDIF
+END Getline
+----------------------------------------------------
+-- LOG                            
+----------------------------------------------------
+ROUTINE LogPip  --(in_file:FILE;file_name:STRING;in_string:STRING) 
+
+VAR 
+    lStat       :INTEGER
+    ok          :BOOLEAN
+    file_path   :STRING[128]
+
+
+  BEGIN 
+    file_path = 'PIP:/' + file_name
+    ok = OpenFile(in_file,file_path,F_AP)
+    IF (ok) THEN
+      WRITE in_file(GetSysTimeStr + ':' + in_string,CR)
+      lStat = IO_STATUS(in_file)
+      IF (lStat <> 0) THEN PostErr('Pip write',PRIO_LOW) ; ENDIF
+      ok = CloseFile(in_file)
+      IF (NOT ok) THEN PostErr('Pip close',PRIO_LOW); ENDIF
+    ELSE
+      PostErr('Pip open',PRIO_LOW)
+    ENDIF
+END LogPip
+-----------------------------------------------------
+--  Time
+-----------------------------------------------------
+ROUTINE GetSysTimeStr  --  :STRING
+
+VAR
+time_int          :INTEGER
+time_str          :STRING[32]
+secondsI          :INTEGER
+secondsS          :STRING[4]
+
+BEGIN
+  GET_TIME(time_int)
+  CNV_TIME_STR(time_int,time_str)
+  --chop off trailing 
+  time_str = SUB_STR(time_str,1,15)
+  time_str = time_str +':'
+  --seconds part bits 0-4 => 11111 = 31
+  secondsI = time_int AND 31
+  --seconds are stored in 2-sec intervals
+  secondsI = 2*secondsI
+  secondsS = IntToString(secondsI)
+  IF (secondsI < 10) THEN
+    secondsS = '0' + secondsS
+  ENDIF
+
+  RETURN(time_str + secondsS)
+
+END GetSysTimeStr
+----------------------------------------------------
+-- Sring Handling                             
+----------------------------------------------------
+ROUTINE IntToString --(num:INTEGER) : STRING
+VAR 
+  dummy_str     :STRING[16]
+BEGIN
+  CNV_INT_STR(num, 0, 0, dummy_str) -- Convert integer to string
+  dummy_str = SUB_STR(dummy_str,2,STR_LEN(dummy_str)) -- Remove leading blank character
+  RETURN (dummy_str)
+END IntToString 
+----------------------------------------------------
+ROUTINE RealToString  --(num:REAL) : STRING
+VAR 
+  dummy_str :STRING[16] 
+BEGIN 
+  CNV_REAL_STR(num,0,3,dummy_str)--convert real to srting 
+  dummy_str = SUB_STR(dummy_str,2,STR_LEN(dummy_str)) -- Remove leading blank character
+  RETURN(dummy_str)
+END RealToString 
+----------------------------------------------------
+ROUTINE IntParse--(in_string:STRING):INTEGER 
+VAR
+  ret_val              :INTEGER 
+  lStat                :INTEGER 
+BEGIN 
+  CNV_STR_INT(in_string,ret_val)
+  IF UNINIT(ret_val)THEN 
+    PostErr('Parse failed',PRIO_HIGH)
+  ENDIF 
+  RETURN(ret_val)
+END IntParse
+----------------------------------------------------
+ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM
+    VAR
+    str_size        :INTEGER
+    char_ptr        :INTEGER
+    ary_ptr		    :INTEGER
+    tmp_entry       :STRING[128]
+    char            :STRING[1]
+
+    BEGIN
+    --init:
+    cmd_size = 0
+    str_size = 0
+    char_ptr = 0
+    ary_ptr  = 0
+    char = ''
+    tmp_entry = ''
+    str_size = STR_LEN(in_string)
+    IF (str_size = 0) THEN
+        l_stat = -1
+        RETURN
+    ENDIF
+    
+    WHILE ((char_ptr <= str_size) AND (ary_ptr < ARRAY_LEN(out_str_ary))) DO
+        WHILE ((char <> separator) AND (char_ptr <= str_size)) DO
+            -- build string one by one
+            tmp_entry = tmp_entry + char
+            char_ptr = char_ptr + 1
+            char = SUB_STR(in_string,char_ptr,1)
+        ENDWHILE
+        --reset char => allow next cycle
+        char = ''
+        ary_ptr = ary_ptr + 1 
+        out_str_ary[ary_ptr] = tmp_entry
+        tmp_entry = ''
+        cmd_size = cmd_size + 1
+    ENDWHILE
+
+END SplitStr
+----------------------------------------------------
+--  Dig Ports
+----------------------------------------------------
+ROUTINE GetMaxIO  --:INTEGER
+VAR 
+  result       :INTEGER 
+BEGIN 
+  result = GetSysI('$MAX_DIG_PRT')
+  RETURN(result)
+
+END GetMaxIO
+----------------------------------------------------
+ROUTINE GetMaxFLG   --:INTEGER FROM KR_COMROUT
+VAR 
+  result      :INTEGER 
+BEGIN 
+  result = GetSysI('$MIX_LOGIC.$NUM_FLG')
+  RETURN(result)
+END GetMaxFLG
+----------------------------------------------------
+----------------------------------------------------
+--  TPP ARGUMENTS
+----------------------------------------------------
+ROUTINE GetIntArg--(idx:INTEGER):INTEGER FROM 
+VAR 
+ret_val,
+DataType,
+DummyInt,
+lStat         :INTEGER
+DummyReal     :REAL 
+DummyStr      :STRING[1]
+
+BEGIN 
+  GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
+  IF (lStat = SUCCESS) THEN 
+    IF (DataType = TYP_INT) THEN 
+      ret_val = DummyInt
+    ELSE 
+      PostErr('Get TPE Int: Bad type',PRIO_HIGH)
+    ENDIF
+  ELSE 
+    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+  ENDIF 
+  RETURN(ret_val)
+END GetIntArg
+----------------------------------------------------
+ROUTINE GetRealArg--(idx:INTEGER):REAL FROM 
+VAR 
+ret_val       :REAL
+DataType,
+DummyInt,
+lStat          :INTEGER
+DummyReal     :REAL 
+DummyStr      :STRING[1]
+
+BEGIN 
+  GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
+  IF (lStat = SUCCESS) THEN 
+    IF (DataType = TYP_REAL) THEN 
+      ret_val = DummyReal
+    ELSE 
+      PostErr('Get TPE Real: Bad type',PRIO_HIGH)
+    ENDIF
+  ELSE 
+    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+  ENDIF 
+  RETURN(ret_val)
+END GetRealArg
+----------------------------------------------------
+ROUTINE GetStrArg--(idx:INTEGER):STRING FROM  
+VAR 
+ret_val       :STRING[32]
+lStat         :INTEGER 
+DataType      :INTEGER   
+DummyInt      :INTEGER 
+DummyReal     :REAL 
+DummyStr      :STRING[32] 
+
+BEGIN 
+  GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
+  IF (lStat = SUCCESS) THEN 
+    IF (DataType = TYP_STRING) THEN 
+      ret_val = DummyStr 
+    ELSE 
+      PostErr('Get TPE Real: Bad type',PRIO_HIGH)
+    ENDIF 
+  ELSE 
+    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+  ENDIF 
+  RETURN(ret_val) 
+END GetStrArg
+
+----------------------------------------------------
+--  Registers
+----------------------------------------------------
+ROUTINE GetRealReg --(regno:INTEGER):REAL
+--GET_REG(register_no, real_flag, int_value, real_value, status)
+VAR 
+  lRealFlag     :BOOLEAN
+  lIntVal       :INTEGER 
+  lRealVal      :REAL  
+  lStat         :INTEGER 
+BEGIN 
+  GET_REG(regno,lRealFlag,lIntVal,lRealVal,lStat)  
+  IF(lStat = 0)THEN 
+    IF (NOT(lRealFlag))THEN 
+      lRealVal = lIntVal
+    ENDIF
+    RETURN(lRealVal) 
+  ELSE 
+    PostErr('Err reading RealReg.',PRIO_HIGH)
+  ENDIF 
+END GetRealReg --(regno:INTEGER) 
+---------------------------------------------------------
+ROUTINE GetIntReg --(regno:INTEGER):INTEGER 
+VAR 
+  lRealFlag      :BOOLEAN
+  lIntVal        :INTEGER 
+  lRealVal       :REAL  
+  lStat          :INTEGER 
+
+BEGIN 
+  GET_REG(regno,lRealFlag,lIntVal,lRealVal,lStat)
+  IF((lStat = 0) AND NOT(lRealFlag)) THEN 
+    RETURN(lIntVal)
+  ELSE
+    PostErr('Err reading IntReg or R val',PRIO_HIGH)
+  ENDIF   
+END GetIntReg
+---------------------------------------------------------
+ROUTINE GetMaxReg --:INTEGER
+VAR 
+  lStat     :INTEGER 
+  result    :INTEGER 
+  lEntry    :INTEGER
+  
+BEGIN 
+  GET_VAR(lEntry,'*NUMREG*','$MAXREGNUM',result,lStat) 
+  RETURN(result)
+END GetMaxReg
+---------------------------------------------------------
+ROUTINE GetMaxPReg 
+VAR 
+  lStat      :INTEGER 
+  result     :INTEGER 
+  lEntry     :INTEGER
+  
+BEGIN 
+  GET_VAR(lEntry,'*POSREG*','$MAXPREGNUM',result,lStat) 
+  RETURN(result)
+END GetMaxPReg
+---------------------------------------------------------
+ROUTINE GetPosReg--(idx:INTEGER):XYZWPR FROM  
+VAR 
+lStat           :INTEGER
+lNumAxes        :INTEGER 
+lPosType        :INTEGER
+ret_val         :XYZWPR IN GROUP[1]
+BEGIN 
+  POS_REG_TYPE(idx,1,lPosType,lNumAxes,lStat)
+  IF (lStat = SUCCESS) AND (lPosType = TYP_XYZ) THEN 
+      ret_val = GET_POS_REG(idx,lStat)
+  ELSE 
+    PostErr('Err reading PR or bad type',PRIO_HIGH)
+  ENDIF
+  RETURN(ret_val)
+END GetPosReg
+---------------------------------------------------------
+ROUTINE SetPosReg --(idx:INTEGER;in_pos:XYZWPR) FROM 
+VAR 
+lStat            :INTEGER  
+BEGIN  
+  SET_POS_REG(idx,in_pos,lStat) 
+  IF(lStat<>0)THEN
+    PostErr('Set PR failed',PRIO_HIGH)
+  ENDIF 
+END SetPosReg
+---------------------------------------------------------
+ROUTINE GetStrReg--(idx:INTEGER):STRING FROM  
+VAR 
+ret_val          :STRING[254]
+lStat            :INTEGER
+BEGIN 
+  GET_STR_REG(idx,ret_val,lStat) 
+  IF(lStat<>0)THEN 
+    PostErr('Err getting SR',PRIO_HIGH)
+  ENDIF
+  RETURN(ret_val)
+END GetStrReg    
+
+----------------------------------------------------
+--  Math
+----------------------------------------------------
+ROUTINE POW --(base:REAL,exponent:INTEGER):REAL 
+
+VAR 
+ret_val         :REAL
+cpy_exp         :INTEGER
+BEGIN 
+  ret_val = 1 
+  cpy_exp = exponent
+  WHILE (cpy_exp>0) DO
+    ret_val = ret_val*base 
+    cpy_exp = cpy_exp -1
+  ENDWHILE
+  RETURN(ret_val)
+END POW
+----------------------------------------------------
+ROUTINE Dec2Bin --(input:INTEGER,output:ARRAY OF BOOLEAN)
+VAR 
+  input_cpy   :INTEGER
+  i           :INTEGER
+BEGIN
+  --check array size:
+  IF ARRAY_LEN(output) <> SZ_INT THEN
+    PostErr('Bad array size.',PRIO_HIGH)
+  ENDIF
+  --init
+  input_cpy = input
+  FOR i=1 TO SZ_INT DO
+    output[i] = FALSE
+  ENDFOR
+  i = 1
+  REPEAT
+    IF ((input_cpy MOD 2) > 0) THEN
+      output[i] = TRUE 
+    ENDIF
+    input_cpy = input_cpy DIV 2
+    i = i +1
+  UNTIL(input_cpy = 0)
+
+END Dec2Bin
+----------------------------------------------------
+-- This function routine is a random number generator
+-- [IN] : seed
+--        This integer must be 
+--      - a global variable, should be in CMOS,
+--      - initialized with any integer value before 
+--        first call to this routine,
+--      - provided to this routine by reference, 
+--        not value.
+-- [OUT] : random number
+ROUTINE random --(seed : INTEGER) : REAL
+CONST
+  MULTIPLIER  = 25173
+  INCREMENT   = 13849
+  MODULUS     = 65536
+BEGIN
+  seed = (seed * MULTIPLIER + INCREMENT) MOD MODULUS
+  RETURN(seed/65535.0)
+END random
+----------------------------------------------------
+ROUTINE xor --(param1, param2 : INTEGER) : INTEGER
+BEGIN
+  RETURN(((param1 AND (NOT param2)) OR ((NOT param1) AND param2)))-- AND 65535)
+END xor
+----------------------------------------------------
+-- UIF
+----------------------------------------------------
+
+-- This procedure routine will force specified URL (by default, on the TP_PANEL)
+-- It can be used after gettpuifurl to restore the pane layout, menus and 
+--focus on iPendant.
+ROUTINE setuifurl --(url: STRING)
+BEGIN
+  FORCE_LINK(TP_PANEL, url)
+END setuifurl
+
+-- This function routine collects, combines in a single 
+--URL, and returns information about 
+--current pane layout of the iPendant 
+--(single, double, etc.), and
+--currently displayed menus (softpart_id and screen_id) 
+--in each pane, and 
+--which pane currently has focus.
+--This URL can be used to restore the pane layout, 
+--menus and focus on iPendant
+ROUTINE gettpuifurl --: STRING
+VAR
+  tpuifurl: STRING[254]
+  paramval: STRING[30]
+  sp, scrn: INTEGER
+  lEntry, lStat  : INTEGER
+BEGIN
+  tpuifurl = '/SOFTPART/GENLINK' 
+  GET_VAR(lEntry,'*SYSTEM*', '$TP_CURSCRN[1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$TP_CURSCRN[1].$SCRN_ID', scrn, lStat)
+  paramval = 'prim=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '?' + paramval
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[1,1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[1,1].$SCRN_ID', scrn, lStat)
+  paramval = 'dual=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '&' + paramval
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[2,1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[2,1].$SCRN_ID', scrn, lStat)
+  paramval = 'triple=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '&' + paramval
+  SELECT $UI_CONFIG.$MODE[1] OF
+    CASE(3): 
+      IF $UI_CONFIG.$ENB_WIDE[1] THEN
+        paramval = 'config=wide'
+      ELSE
+        paramval = 'config=single'
+      ENDIF
+    CASE(4): paramval = 'config=statsing'
+    CASE(5): paramval = 'config=double'
+    CASE(6): paramval = 'config=triple'
+    CASE(13): paramval = 'config=doubleh'
+    CASE(14): paramval = 'config=tripleh'
+  ENDSELECT
+  tpuifurl = tpuifurl + '&' + paramval
+  SELECT $UI_CONFIG.$FOCUS[1] OF
+    CASE(0): paramval = 'focus=prim'
+    CASE(1): paramval = 'focus=dual'
+    CASE(2): paramval = 'focus=triple'
+  ENDSELECT
+  tpuifurl = tpuifurl + '&' + paramval
+  RETURN (tpuifurl)
+END gettpuifurl
+----------------------------------------------------
+ROUTINE TPForceWide   
+ VAR                         
+  tpuifurl: STRING[254]     
+  paramval: STRING[30]      
+  sp, scrn: INTEGER         
+  lEntry, lStat  : INTEGER
+ 
+BEGIN 
+  tpuifurl = '/SOFTPART/GENLINK' 
+  GET_VAR(lEntry,'*SYSTEM*', '$TP_CURSCRN[1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$TP_CURSCRN[1].$SCRN_ID', scrn, lStat)
+  paramval = 'prim=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '?' + paramval
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[1,1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[1,1].$SCRN_ID', scrn, lStat)
+  paramval = 'dual=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '&' + paramval
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[2,1].$SP_ID', sp, lStat)
+  GET_VAR(lEntry,'*SYSTEM*', '$UI_CURSCRN[2,1].$SCRN_ID', scrn, lStat)
+  paramval = 'triple=menupage,' + IntToString(sp) + ',' + IntToString(scrn)
+  tpuifurl = tpuifurl + '&' + paramval
+  
+  paramval = 'config=wide'
+
+  tpuifurl = tpuifurl + '&' + paramval
+  
+  paramval = 'focus=prim'
+  
+  tpuifurl = tpuifurl + '&' + paramval
+  
+  RETURN(tpuifurl)
+END TPForceWide
+----------------------------------------------------
+--  FRAME/TOOL 
+----------------------------------------------------
+ROUTINE GetUFrame --(inUFrame:INTEGER;outPosition:POSITION)
+VAR 
+lMaxFrames        :INTEGER
+lVarName         :STRING[32]
+lsFrame           :STRING[3]
+lEntry           :INTEGER
+lStat             :INTEGER
+
+BEGIN
+  --check if input frame exceeds max frames defined
+  lVarName = '$SCR.$MAXNUMUFRAM'
+  lMaxFrames = GetSysI(lVarName) 
+  IF(inUFrame >= 1) AND (inUFrame <= lMaxFrames) THEN 
+    lsFrame = IntToString(inUFrame)
+    lVarName = '$MNUFRAME[1,' + lsFrame + ']'
+    GET_VAR(lEntry,'*SYSTEM*',lVarName,outPosition,lStat)
+    IF (lStat <> 0) THEN
+      PostErr('Err getting var' + lVarName,PRIO_HIGH)
+    ENDIF
+  ELSE 
+    PostErr('Var out of range: UF Num',PRIO_HIGH)
+  ENDIF 
+END GetUFrame
+----------------------------------------------------------
+ROUTINE GetUTool --(inUTool:INTEGER;outPosition:POSITION)
+
+VAR 
+lMaxFrames       :INTEGER      
+retval            :POSITION 
+lVarName         :STRING[32]
+lFrame           :STRING[3]
+lStat             :INTEGER
+lEntry           :INTEGER
+
+BEGIN 
+  --check if input franme exceeds max frames defined
+  lVarName = '$SCR.$MAXNUMUTOOL'
+  lMaxFrames = GetSysI(lVarName) 
+  IF(inUTool >= 1) AND (inUTool <= lMaxFrames) THEN 
+    lFrame = IntToString(inUTool)
+    lVarName = '$MNUTOOL[1,' + lFrame + ']'
+    GET_VAR(lEntry,'*SYSTEM*',lVarName,outPosition,lStat)
+    IF (lStat <> 0) THEN
+      PostErr('Err getting var' + lVarName,PRIO_HIGH)
+    ENDIF
+  ELSE 
+    PostErr('Var out of range: UT Num',PRIO_HIGH)
+  ENDIF
+END GetUTool 
+----------------------------------------------------------
+--Position 
+----------------------------------------------------------
+ROUTINE SetConf--(confstr:STRING):CONFIG 
+VAR 
+ret_val           :CONFIG 
+lStat             :INTEGER 
+
+BEGIN 
+  CNV_STR_CONF(confstr,ret_val,lStat)
+  IF(lStat <> 0)THEN
+    PostErr('Err convert conf',PRIO_HIGH)
+  ENDIF 
+  RETURN(ret_val)
+END SetConf 
