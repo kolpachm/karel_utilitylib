@@ -1,6 +1,6 @@
 PROGRAM MyProgram
 ----------------------------------------------------
--- Creation date: 2020.05.25
+-- Creation date: 2020-05-25 12:20:20
 -- Created by: 
 ----------------------------------------------------
 -- Version: 0.0.0.0 - 00
@@ -10,21 +10,21 @@ PROGRAM MyProgram
 -- Last modified: 2020.05.25
 -- Last modified by:                              
 ----------------------------------------------------
--- %COMMENT = '0.0.0.0 - 00'
--- %ALPHABETIZE
--- %NOABORT = ERROR+COMMAND+TPENABLE
--- %NOPAUSE = ERROR+COMMAND+TPENABLE
--- %NOPAUSESHFT
--- %NOLOCKGROUP
--- %NOBUSYLAMP
--- %CMOSVARS
--- %CMOS2SHADOW
--- %SHADOWVARS
--- %INCLUDE KLEVKEYS
--- %INCLUDE KLEVKMSK
--- %INCLUDE KLEVCCDF
--- %INCLUDE KLIOUOP
--- %INCLUDE KLIOTYPS
+%COMMENT = '0.0.0.0 - 00'
+%ALPHABETIZE
+--%NOABORT = ERROR+COMMAND+TPENABLE
+%NOPAUSE = ERROR+COMMAND+TPENABLE
+%NOPAUSESHFT
+%NOLOCKGROUP
+%NOBUSYLAMP
+--%CMOSVARS
+--%CMOS2SHADOW
+%SHADOWVARS
+%INCLUDE KLEVKEYS
+%INCLUDE KLEVKMSK
+%INCLUDE KLEVCCDF
+%INCLUDE KLIOUOP
+%INCLUDE KLIOTYPS
 ----------------------------------------------------
 -- CONTANTS AND TYPES                               
 ----------------------------------------------------
@@ -41,5 +41,5 @@ PROGRAM MyProgram
 -- BEGIN MyProgram                             
 ----------------------------------------------------
 BEGIN
-    
+    WRITE('Hello World.')
 END MyProgram
