@@ -250,15 +250,16 @@ BEGIN
   RETURN(dummy_str)
 END RealToString 
 ----------------------------------------------------
-ROUTINE IntParse--(in_string:STRING):INTEGER 
+ROUTINE IntParse--(str:STRING,stat:INTEGER):INTEGER 
 VAR
   ret_val              :INTEGER 
-  lStat                :INTEGER 
 BEGIN 
-  CNV_STR_INT(in_string,ret_val)
+  CNV_STR_INT(str,ret_val)
   IF UNINIT(ret_val)THEN 
-    PostErr('Parse failed',PRIO_HIGH)
-  ENDIF 
+    stat = -1 --parse failed
+    RETURN(0)
+  ENDIF
+  stat = 0 
   RETURN(ret_val)
 END IntParse
 ----------------------------------------------------
