@@ -263,7 +263,7 @@ BEGIN
   RETURN(ret_val)
 END IntParse
 ----------------------------------------------------
-ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM
+ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;stat:INTEGER) FROM
     VAR
     str_size        :INTEGER
     char_ptr        :INTEGER
@@ -281,7 +281,7 @@ ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRIN
     tmp_entry = ''
     str_size = STR_LEN(in_string)
     IF (str_size = 0) THEN
-        l_stat = -1
+        stat = -1
         RETURN
     ENDIF
     

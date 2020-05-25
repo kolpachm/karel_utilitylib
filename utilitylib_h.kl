@@ -64,7 +64,7 @@ ROUTINE RealToString(num:REAL) : STRING FROM utilitylib
 ----------------------------------------------------
 ROUTINE IntParse(str:STRING,stat:INTEGER):INTEGER  FROM utilitylib 
 ----------------------------------------------------
-ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM utilitylib
+ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;stat:INTEGER) FROM utilitylib
 ----------------------------------------------------
 --  Dig Ports
 ----------------------------------------------------
