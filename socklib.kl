@@ -70,7 +70,7 @@ BEGIN
 
     -- check state of tag, make sure it is STARTED
     GET_VAR(lEntry, '*SYSTEM*', sock.cfg_str + '.$STATE', lState, sock.stat)
-    IF (sock.stat <> 0) OR (lState <> TAG_STARTED) THEN
+    IF (sock.stat <> 0) OR (lState <> STAT_START) THEN
         -- TAG config not correct, or couldn't read it
         RETURN (TAG_CONF_ERR)
     ENDIF
@@ -231,4 +231,4 @@ BEGIN
     IF (lStat = 0) THEN RETURN(bytes_ahd);ENDIF 
     
     RETURN(-lStat)
-END ipkt_checkfd
+END getBuffBytes

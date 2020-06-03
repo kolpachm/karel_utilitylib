@@ -44,7 +44,7 @@ ROUTINE ssock_accept(sock : type_sock) : INTEGER FROM socklib
 -- Wait for a connection on the given socket instance. 
 -- If successful, open given file descriptor on it.
 ----------------------------------------------------
-ROUTINE ssock_accpt2(sock : type_sock; f : FILE) : INTEGER FROM socklib
+ROUTINE ssock_accept2(sock : type_sock; f : FILE) : INTEGER FROM socklib
 
 ----------------------------------------------------
 -- Source: 
