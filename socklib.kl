@@ -163,7 +163,7 @@ BEGIN
     RETURN (-lStat)
 END ssock_disco2
 --------------------------------------------------------
-ROUTINE ssock_discof
+ROUTINE ssock_discof --(sock : type_sock) : INTEGER FROM socklib
 VAR
     lStat : INTEGER
 BEGIN
