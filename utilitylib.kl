@@ -3,14 +3,15 @@ PROGRAM utilitylib
 -- Creation date: 2020.05.21
 -- Created by: MKOL
 ----------------------------------------------------
--- Version: 0.1.0.0 - 7DF1
+-- Version: 0.1.0.3 - 7DF1
 ----------------------------------------------------
--- Function: Utility Lib
+-- Function: Common Utility Routines
 ----------------------------------------------------
 -- Last modified: 2020.05.21
 -- Last modified by: MKOL                             
+-- 2020-06-04 20:39:37: RealParse added
 ----------------------------------------------------
-%COMMENT = '0.1.0.2 - 7DF1'
+%COMMENT = '0.1.0.3 - 7DF1'
 -- %INCLUDE KLEVKEYS
 -- %INCLUDE KLEVKMSK
 %INCLUDE KLEVCCDF
@@ -250,7 +251,7 @@ BEGIN
   RETURN(dummy_str)
 END RealToString 
 ----------------------------------------------------
-ROUTINE IntParse--(str:STRING,stat:INTEGER):INTEGER 
+ROUTINE IntParse--(str:STRING;stat:INTEGER):INTEGER 
 VAR
   ret_val              :INTEGER 
 BEGIN 
@@ -263,11 +264,24 @@ BEGIN
   RETURN(ret_val)
 END IntParse
 ----------------------------------------------------
+ROUTINE RealParse--(str:STRING;stat:INTEGER) :REAL
+VAR 
+  ret_val  :REAL
+BEGIN 
+  stat = 0;
+  CNV_STR_REAL(str,ret_val)
+  IF UNINIT(ret_val) THEN 
+    stat = -1
+    RETURN(0)
+  ENDIF
+  RETURN(ret_val)
+END RealParse
+----------------------------------------------------
 ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM
     VAR
     str_size        :INTEGER
     char_ptr        :INTEGER
-    ary_ptr		    :INTEGER
+    ary_ptr		      :INTEGER
     tmp_entry       :STRING[128]
     char            :STRING[1]
 
@@ -280,6 +294,7 @@ ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRIN
     char = ''
     tmp_entry = ''
     str_size = STR_LEN(in_string)
+    IF UNINIT(l_stat) THEN l_stat = 0; ENDIF
     IF (str_size = 0) THEN
         l_stat = -1
         RETURN
