@@ -188,7 +188,7 @@ VAR
 
 
   BEGIN 
-    file_path = 'PIP:/' + file_name
+    file_path = 'PIP:' + file_name
     ok = OpenFile(in_file,file_path,F_AP)
     IF (ok) THEN
       WRITE in_file(GetSysTimeStr + ':' + in_string,CR)
