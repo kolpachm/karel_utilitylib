@@ -30,4 +30,6 @@ CONST
     E_INVCHAR       = 22012 -- ASBN012 Invalid character   
     E_POSNOTEXIST   = 7071  -- MEMO071 position does not exist
     E_REGREADFAIL   = 12228 -- INTP228 Read register failed
+    E_ILLEGALF      = 2022 -- FILE022 Illegal file name
+    E_ILLEGALFN     = 2023 -- FILE023 Illegal file number
     
