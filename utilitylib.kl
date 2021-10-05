@@ -3,7 +3,7 @@ PROGRAM utilitylib
 -- Creation date: 2020.05.21
 -- Created by: MKOL
 ----------------------------------------------------
--- Version: 0.1.0.3 - 7DF1
+-- Version: 0.1.0.4 - 7DF3
 ----------------------------------------------------
 -- Function: Common Utility Routines
 ----------------------------------------------------
@@ -11,7 +11,9 @@ PROGRAM utilitylib
 -- Last modified by: MKOL                             
 -- 2020-06-04 20:39:37: RealParse added
 ----------------------------------------------------
-%COMMENT = '0.1.0.3 - 7DF1'
+%COMMENT = '0.1.0.4 - 7DF3'
+%NOPAUSE = ERROR+COMMAND+TPENABLE
+%NOLOCKGROUP
 -- %INCLUDE KLEVKEYS
 -- %INCLUDE KLEVKMSK
 %INCLUDE KLEVCCDF
