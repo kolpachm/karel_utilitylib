@@ -68,6 +68,8 @@ ROUTINE RealParse(str:STRING;stat:INTEGER):REAL FROM utilitylib
 ----------------------------------------------------
 ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM utilitylib
 ----------------------------------------------------
+routine ToUpper(p_char: integer): string FROM utilitylib
+----------------------------------------------------
 --  Dig Ports
 ----------------------------------------------------
 ROUTINE GetMaxIO :INTEGER FROM utilitylib

@@ -318,6 +318,15 @@ ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRIN
     ENDWHILE
 
 END SplitStr
+
+routine toupper --(p_char: integer): string
+
+begin
+  if (p_char > 96) and (p_char < 123) then
+    p_char = p_char - 32
+  endif
+  return (chr(p_char))
+end toupper
 ----------------------------------------------------
 --  Dig Ports
 ----------------------------------------------------
