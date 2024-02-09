@@ -114,17 +114,32 @@ END SetSysI
 ----------------------------------------------------
 -- ERR Handling                             
 ----------------------------------------------------
-ROUTINE PostErr --(message:STRING;prio:INTEGER)
+ROUTINE PostErrTxt --(message:STRING)
 BEGIN 
-  ClearErr
+  WRITE TPERROR(CHR(128),CHR(137))
   WRITE TPERROR(message,CR)
-  SELECT (prio) OF
-    CASE(PRIO_MID):  PAUSE 
-    CASE(PRIO_HIGH): ABORT 
-  ELSE:
-  ENDSELECT
-END PostErr
+END PostErrTxt
 ----------------------------------------------------
+ROUTINE PostErr --(code:INTEGER;message:STRING;prio:INTEGER)
+BEGIN 
+    --code usualy = status
+    POST_ERR(code,'', 0,0)
+    IF(message <> '') THEN
+      DELAY(1000)
+      PostErrTxt(message)
+    ENDIF
+    SELECT prio OF
+      CASE(0):  --WARNING
+        --do nothing
+      CASE(1):  --PAUSE
+        PAUSE
+      CASE(2):  -- ABORT
+        ABORT 
+      ELSE:
+        ABORT
+    ENDSELECT
+    
+END PostErr
 ----------------------------------------------------
 --   File
 ----------------------------------------------------
