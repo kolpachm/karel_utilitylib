@@ -122,6 +122,9 @@ END PostErrTxt
 ----------------------------------------------------
 ROUTINE PostErr --(code:INTEGER;message:STRING;prio:INTEGER)
 BEGIN 
+    IF (code = 0) THEN
+      RETURN
+    ENDIF
     --code usualy = status
     POST_ERR(code,'', 0,0)
     IF(message <> '') THEN
