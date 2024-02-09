@@ -75,7 +75,7 @@ VAR
   lStat     :INTEGER 
 BEGIN
   GET_VAR(lEntry, '*SYSTEM*', varname, result, lStat)
-  IF (lStat<>0) THEN PostErr('Failed to read: ' + varname,PRIO_HIGH);ENDIF
+  IF (lStat<>0) THEN PostErr(lStat,'Failed to read: ' + varname,PRIO_HIGH);ENDIF
   RETURN(result)
 END GetSysB
 ----------------------------------------------------------
@@ -87,7 +87,7 @@ VAR
   lStat     :INTEGER 
 BEGIN
   GET_VAR(lEntry, '*SYSTEM*', varname, result, lStat)
-  IF (lStat<>0) THEN PostErr('Failed to get: ' + varname,PRIO_HIGH);ENDIF
+  IF (lStat<>0) THEN PostErr(lStat,'Failed to get: ' + varname,PRIO_HIGH);ENDIF
   RETURN(result)
 END GetSysI
 ----------------------------------------------------------
@@ -98,7 +98,7 @@ VAR
   lStat     :INTEGER 
 BEGIN
   SET_VAR(lEntry, '*SYSTEM*', varname, value, lStat)
-  IF (lStat<>0) THEN PostErr('Failed to set: ' + varname,PRIO_HIGH);ENDIF
+  IF (lStat<>0) THEN PostErr(lStat,'Failed to set: ' + varname,PRIO_HIGH);ENDIF
 END SetSysB
 ----------------------------------------------------------
 -- This routine sets INTEGER type system variable and check operation status
@@ -109,7 +109,7 @@ VAR
   lStat        :INTEGER 
 BEGIN
   SET_VAR(lEntry, '*SYSTEM*', varname, value, lStat)
-  IF (lStat<>0) THEN PostErr('Failed to set: ' + varname,PRIO_HIGH);ENDIF
+  IF (lStat<>0) THEN PostErr(lStat,'Failed to set: ' + varname,PRIO_HIGH);ENDIF
 END SetSysI
 ----------------------------------------------------
 -- ERR Handling                             
@@ -165,7 +165,7 @@ BEGIN
   IF (lStat = SUCCESS) THEN 
     RETURN(TRUE) 
   ELSE
-    PostErr('Err open' + file_path,PRIO_LOW) 
+    PostErr(lStat,'Err open' + file_path,PRIO_LOW) 
     RETURN(FALSE)
   ENDIF
 END OpenFile
@@ -179,7 +179,7 @@ BEGIN
   IF lStat = 0 THEN
     RETURN (TRUE)
   ELSE 
-    PostErr('Err closing file',PRIO_LOW)
+    PostErr(lStat,'Err closing file',PRIO_LOW)
     RETURN (FALSE)
   ENDIF 
 
@@ -211,11 +211,11 @@ VAR
     IF (ok) THEN
       WRITE in_file(GetSysTimeStr + ':' + in_string,CR)
       lStat = IO_STATUS(in_file)
-      IF (lStat <> 0) THEN PostErr('Pip write',PRIO_LOW) ; ENDIF
+      IF (lStat <> 0) THEN PostErr(lStat,'Pip write',PRIO_LOW) ; ENDIF
       ok = CloseFile(in_file)
-      IF (NOT ok) THEN PostErr('Pip close',PRIO_LOW); ENDIF
+      IF (NOT ok) THEN PostErr(lStat,'Pip close',PRIO_LOW); ENDIF
     ELSE
-      PostErr('Pip open',PRIO_LOW)
+      PostErr(-1,'Pip open',PRIO_LOW)
     ENDIF
 END LogPip
 -----------------------------------------------------
@@ -380,10 +380,10 @@ BEGIN
     IF (DataType = TYP_INT) THEN 
       ret_val = DummyInt
     ELSE 
-      PostErr('Get TPE Int: Bad type',PRIO_HIGH)
+      PostErr(lStat,'Get TPE Int: Bad type',PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+    PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
   ENDIF 
   RETURN(ret_val)
 END GetIntArg
@@ -403,10 +403,10 @@ BEGIN
     IF (DataType = TYP_REAL) THEN 
       ret_val = DummyReal
     ELSE 
-      PostErr('Get TPE Real: Bad type',PRIO_HIGH)
+      PostErr(lStat,'Get TPE Real: Bad type',PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+    PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
   ENDIF 
   RETURN(ret_val)
 END GetRealArg
@@ -426,10 +426,10 @@ BEGIN
     IF (DataType = TYP_STRING) THEN 
       ret_val = DummyStr 
     ELSE 
-      PostErr('Get TPE Real: Bad type',PRIO_HIGH)
+      PostErr(lStat,'Get TPE Real: Bad type',PRIO_HIGH)
     ENDIF 
   ELSE 
-    PostErr('Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
+    PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
   ENDIF 
   RETURN(ret_val) 
 END GetStrArg
@@ -452,7 +452,7 @@ BEGIN
     ENDIF
     RETURN(lRealVal) 
   ELSE 
-    PostErr('Err reading RealReg.',PRIO_HIGH)
+    PostErr(lStat,'Err reading RealReg.',PRIO_HIGH)
   ENDIF 
 END GetRealReg --(regno:INTEGER) 
 ---------------------------------------------------------
@@ -468,7 +468,7 @@ BEGIN
   IF((lStat = 0) AND NOT(lRealFlag)) THEN 
     RETURN(lIntVal)
   ELSE
-    PostErr('Err reading IntReg or R val',PRIO_HIGH)
+    PostErr(lStat,'Err reading IntReg or R val',PRIO_HIGH)
   ENDIF   
 END GetIntReg
 ---------------------------------------------------------
@@ -505,7 +505,7 @@ BEGIN
   IF (lStat = SUCCESS) AND (lPosType = TYP_XYZ) THEN 
       ret_val = GET_POS_REG(idx,lStat)
   ELSE 
-    PostErr('Err reading PR or bad type',PRIO_HIGH)
+    PostErr(lStat,'Err reading PR or bad type',PRIO_HIGH)
   ENDIF
   RETURN(ret_val)
 END GetPosReg
@@ -516,7 +516,7 @@ lStat            :INTEGER
 BEGIN  
   SET_POS_REG(idx,in_pos,lStat) 
   IF(lStat<>0)THEN
-    PostErr('Set PR failed',PRIO_HIGH)
+    PostErr(lStat,'Set PR failed',PRIO_HIGH)
   ENDIF 
 END SetPosReg
 ---------------------------------------------------------
@@ -527,7 +527,7 @@ lStat            :INTEGER
 BEGIN 
   GET_STR_REG(idx,ret_val,lStat) 
   IF(lStat<>0)THEN 
-    PostErr('Err getting SR',PRIO_HIGH)
+    PostErr(lStat,'Err getting SR',PRIO_HIGH)
   ENDIF
   RETURN(ret_val)
 END GetStrReg    
@@ -557,7 +557,7 @@ VAR
 BEGIN
   --check array size:
   IF ARRAY_LEN(output) <> SZ_INT THEN
-    PostErr('Bad array size.',PRIO_HIGH)
+    PostErr(-1,'Bad array size.',PRIO_HIGH)
   ENDIF
   --init
   input_cpy = input
@@ -714,10 +714,10 @@ BEGIN
     lVarName = '$MNUFRAME[1,' + lsFrame + ']'
     GET_VAR(lEntry,'*SYSTEM*',lVarName,outPosition,lStat)
     IF (lStat <> 0) THEN
-      PostErr('Err getting var' + lVarName,PRIO_HIGH)
+      PostErr(lStat,'Err getting var' + lVarName,PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr('Var out of range: UF Num',PRIO_HIGH)
+    PostErr(-1,'Var out of range: UF Num',PRIO_HIGH)
   ENDIF 
 END GetUFrame
 ----------------------------------------------------------
@@ -740,10 +740,10 @@ BEGIN
     lVarName = '$MNUTOOL[1,' + lFrame + ']'
     GET_VAR(lEntry,'*SYSTEM*',lVarName,outPosition,lStat)
     IF (lStat <> 0) THEN
-      PostErr('Err getting var' + lVarName,PRIO_HIGH)
+      PostErr(lStat,'Err getting var' + lVarName,PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr('Var out of range: UT Num',PRIO_HIGH)
+    PostErr(-1,'Var out of range: UT Num',PRIO_HIGH)
   ENDIF
 END GetUTool 
 ----------------------------------------------------------
@@ -757,7 +757,7 @@ lStat             :INTEGER
 BEGIN 
   CNV_STR_CONF(confstr,ret_val,lStat)
   IF(lStat <> 0)THEN
-    PostErr('Err convert conf',PRIO_HIGH)
+    PostErr(lStat,'Err convert conf',PRIO_HIGH)
   ENDIF 
   RETURN(ret_val)
 END SetConf 
