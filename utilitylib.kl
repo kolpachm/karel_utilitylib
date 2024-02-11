@@ -125,7 +125,7 @@ BEGIN
     IF (code = 0) THEN
       RETURN
     ENDIF
-    --code usualy = status
+    --code usualy = status - facility code ffccc
     POST_ERR(code,'', 0,0)
     IF(message <> '') THEN
       DELAY(1000)
@@ -379,11 +379,11 @@ DummyStr      :STRING[1]
 
 BEGIN 
   GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
-  IF (lStat = SUCCESS) THEN 
+  IF (lStat = 0) THEN 
     IF (DataType = TYP_INT) THEN 
       ret_val = DummyInt
     ELSE 
-      PostErr(lStat,'Get TPE Int: Bad type',PRIO_HIGH)
+      PostErr(16060,'Get TPE Int: Bad type',PRIO_HIGH)
     ENDIF
   ELSE 
     PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
@@ -402,11 +402,11 @@ DummyStr      :STRING[1]
 
 BEGIN 
   GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
-  IF (lStat = SUCCESS) THEN 
+  IF (lStat = 0) THEN 
     IF (DataType = TYP_REAL) THEN 
       ret_val = DummyReal
     ELSE 
-      PostErr(lStat,'Get TPE Real: Bad type',PRIO_HIGH)
+      PostErr(16060,'Get TPE Real: Bad type',PRIO_HIGH)
     ENDIF
   ELSE 
     PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
@@ -425,11 +425,11 @@ DummyStr      :STRING[32]
 
 BEGIN 
   GET_TPE_PRM(idx,DataType,DummyInt,DummyReal,DummyStr,lStat) 
-  IF (lStat = SUCCESS) THEN 
+  IF (lStat = 0) THEN 
     IF (DataType = TYP_STRING) THEN 
       ret_val = DummyStr 
     ELSE 
-      PostErr(lStat,'Get TPE Real: Bad type',PRIO_HIGH)
+      PostErr(16060,'Get TPE Real: Bad type',PRIO_HIGH)
     ENDIF 
   ELSE 
     PostErr(lStat,'Err getting TPP Arg: ' + IntToString(idx),PRIO_HIGH)
