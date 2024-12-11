@@ -32,4 +32,5 @@ CONST
     E_REGREADFAIL   = 12228 -- INTP228 Read register failed
     E_ILLEGALF      = 2022 -- FILE022 Illegal file name
     E_ILLEGALFN     = 2023 -- FILE023 Illegal file number
+    E_FTORUNTSK     = 24011 --SYST011 Filed to run task
     

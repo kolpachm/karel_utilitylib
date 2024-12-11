@@ -216,9 +216,11 @@ VAR
       lStat = IO_STATUS(in_file)
       IF (lStat <> 0) THEN PostErr(lStat,'Pip write',PRIO_LOW) ; ENDIF
       ok = CloseFile(in_file)
-      IF (NOT ok) THEN PostErr(lStat,'Pip close',PRIO_LOW); ENDIF
-    ELSE
-      PostErr(-1,'Pip open',PRIO_LOW)
+      ---TO DO: sttus is not valid nr. here
+      --IF (NOT ok) THEN PostErr(lStat,'Pip close',PRIO_LOW); ENDIF
+    --ELSE
+      --TO DO: this won't work with -1
+      --PostErr(-1,'Pip open',PRIO_LOW)
     ENDIF
 END LogPip
 -----------------------------------------------------
@@ -560,7 +562,10 @@ VAR
 BEGIN
   --check array size:
   IF ARRAY_LEN(output) <> SZ_INT THEN
-    PostErr(-1,'Bad array size.',PRIO_HIGH)
+    --TO DO: this won't work with -1
+    --PostErr(-1,'Bad array size.',PRIO_HIGH)
+    PostErrTxt('Bad array size.')
+    ABORT
   ENDIF
   --init
   input_cpy = input
@@ -720,7 +725,7 @@ BEGIN
       PostErr(lStat,'Err getting var' + lVarName,PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr(-1,'Var out of range: UF Num',PRIO_HIGH)
+    PostErr(16028,'Var out of range: UF Num',PRIO_HIGH)
   ENDIF 
 END GetUFrame
 ----------------------------------------------------------
@@ -746,7 +751,7 @@ BEGIN
       PostErr(lStat,'Err getting var' + lVarName,PRIO_HIGH)
     ENDIF
   ELSE 
-    PostErr(-1,'Var out of range: UT Num',PRIO_HIGH)
+    PostErr(16028,'Var out of range: UT Num',PRIO_HIGH)
   ENDIF
 END GetUTool 
 ----------------------------------------------------------
