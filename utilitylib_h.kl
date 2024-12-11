@@ -38,7 +38,8 @@ ROUTINE SetSysI(varname: STRING; value: INTEGER) FROM utilitylib
 ----------------------------------------------------
 -- ERR Handling                             
 ----------------------------------------------------
-ROUTINE PostErr(message:STRING;prio:INTEGER) FROM utilitylib
+ROUTINE PostErrTxt(message:STRING) FROM utilitylib
+ROUTINE PostErr(code:INTEGER;message:STRING;prio:INTEGER) FROM utilitylib
 ----------------------------------------------------
 --   File
 ----------------------------------------------------
@@ -62,9 +63,13 @@ ROUTINE IntToString(num:INTEGER) : STRING FROM utilitylib
 ----------------------------------------------------
 ROUTINE RealToString(num:REAL) : STRING FROM utilitylib
 ----------------------------------------------------
-ROUTINE IntParse(str:STRING,stat:INTEGER):INTEGER  FROM utilitylib 
+ROUTINE IntParse(str:STRING;stat:INTEGER):INTEGER  FROM utilitylib 
+----------------------------------------------------
+ROUTINE RealParse(str:STRING;stat:INTEGER):REAL FROM utilitylib
 ----------------------------------------------------
 ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM utilitylib
+----------------------------------------------------
+routine ToUpper(p_char: integer): string FROM utilitylib
 ----------------------------------------------------
 --  Dig Ports
 ----------------------------------------------------

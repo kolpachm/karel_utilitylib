@@ -1,0 +1,36 @@
+----------------------------------------------------
+-- Creation date: 2020.06.02
+-- Created by: MK
+----------------------------------------------------
+-- Version: 0.0.1.0 - 00
+----------------------------------------------------
+-- Function: Constants for Socket Messaging 
+----------------------------------------------------
+-- Last modified: 2020.06.02
+-- Last modified by:                              
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+TYPE    type_sock    FROM socklib = STRUCTURE
+        connected     : BOOLEAN    
+        stat          : INTEGER
+        port          : INTEGER    -- TCP port number to listen on
+        idx           : INTEGER    -- index into the 'Server' list
+        idx_str       : STRING[3]  
+        cfg_str       : STRING[32] -- config system variable name
+    ENDSTRUCTURE
+
+CONST
+    TAG_CONF_ERR = -1
+    S_OPEN_ERR   = -2
+    S_FD_ERR     = -3
+    S_ACPT_ERR   = -4 -- socket accept error: already connected, for instance
+    S_CONN_ERR   = -5 -- socket connect error: something went wrong waiting for clients to connect
+    S_DISC_ERR   = -6 -- socket disconnect error: not connected, for instance
+    S_NOTCON_ERR = -7 -- general 'not connected' error
+
+    -- TAG status constants
+    STAT_UNDF    =  1 
+    STAT_DEF     =  2 
+    STAT_START   =  3 
+
