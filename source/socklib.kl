@@ -1,0 +1,277 @@
+PROGRAM socklib
+----------------------------------------------------
+-- Creation date: 2020.06.02
+-- Created by: MK
+-- update: 2024.07.14
+----------------------------------------------------
+-- Version: v1.1
+----------------------------------------------------
+-- Function: 
+----------------------------------------------------
+-- Last modified: 2024-09-05 21:37:01
+-- Last modified by: msk                             
+-- Comment: v0.2
+-- Buffer size set to 254 bytes from default 128 
+-- in order to send whole msg in one packet
+----------------------------------------------------
+%COMMENT = 'v1.1'
+%NOPAUSE = ERROR+COMMAND+TPENABLE
+%NOLOCKGROUP
+----------------------------------------------------
+-- CONTANTS AND TYPES                               
+----------------------------------------------------
+%INCLUDE socklib_t_h
+----------------------------------------------------
+-- ROUTINES                                         
+----------------------------------------------------
+%INCLUDE socklib_h
+
+BEGIN
+END socklib
+----------------------------------------------------
+-- Source: 
+-- Copyright (c) 2012, 2013, TU Delft Robotics Institute
+-- All rights reserved.
+ROUTINE sock_ping--(host_ : STRING) : INTEGER
+VAR
+    stat_ : INTEGER
+BEGIN
+    MSG_PING(host_, stat_)
+    RETURN (-stat_)
+END sock_ping
+----------------------------------------------------
+ROUTINE ssock_def--(sock_ : type_sock; port_ : INTEGER; idx_ : INTEGER) : INTEGER 
+VAR
+    s_       : STRING[1] -- temp string for nr to str conversion
+    entry_        : INTEGER   -- dummy var
+    stat_        : INTEGER   -- TAG state
+BEGIN
+    -- setup instance variables
+    sock_.connected  = FALSE
+    sock_.stat       = 0
+    sock_.port       = port_
+    sock_.idx        = idx_
+    sock_.idx_str    = ''
+    sock_.cfg_str    = ''
+
+    -- check
+    IF (sock_.idx < 1) OR (sock_.idx > 8) THEN
+        -- cannot open TAGs that don't exist
+        RETURN (S_OPEN_ERR)
+    ENDIF
+
+    -- construct server_port variable string (ascii 'trick')
+    s_ = CHR(sock_.idx + ORD('0', 1))
+
+    -- and set system variable
+    sock_.cfg_str = '$HOSTS_CFG[' + s_ + ']'
+
+    -- construct server tag string
+    sock_.idx_str = 'S' + s_ + ':'
+
+    -- check state of tag, make sure it is STARTED
+    GET_VAR(entry_, '*SYSTEM*', sock_.cfg_str + '.$STATE', stat_, sock_.stat)
+    IF (sock_.stat <> 0) OR (stat_ <> STAT_START) THEN
+        -- TAG config not correct, or couldn't read it
+        RETURN (TAG_CONF_ERR)
+    ENDIF
+
+    -- set port_ of TAG
+    SET_VAR(entry_, '*SYSTEM*', sock_.cfg_str + '.$SERVER_PORT', sock_.port, sock_.stat)
+    IF sock_.stat <> 0 THEN
+        -- couldn't update TAG config
+        RETURN (TAG_CONF_ERR)
+    ENDIF
+
+    -- done
+    RETURN (sock_.stat)
+END ssock_def
+----------------------------------------------------
+ROUTINE csock_def--(sock_ : type_sock; port_ : INTEGER; idx_ : INTEGER) : INTEGER 
+VAR
+    s_       : STRING[1] -- temp string for nr to str conversion
+    entry_        : INTEGER   -- dummy var
+    stat_        : INTEGER   -- TAG state
+BEGIN
+    -- setup instance variables
+    sock_.connected  = FALSE
+    sock_.stat       = 0
+    sock_.port       = port_
+    sock_.idx        = idx_
+    sock_.idx_str    = ''
+    sock_.cfg_str    = ''
+
+    -- check
+    IF (sock_.idx < 1) OR (sock_.idx > 8) THEN
+        -- cannot open TAGs that don't exist
+        RETURN (S_OPEN_ERR)
+    ENDIF
+
+    -- construct server_port variable string (ascii 'trick')
+    s_ = CHR(sock_.idx + ORD('0', 1))
+
+    -- and set system variable
+    sock_.cfg_str = '$HOSTC_CFG[' + s_ + ']'
+
+    -- construct server tag string
+    sock_.idx_str = 'C' + s_ + ':'
+
+    -- check state of tag, make sure it is STARTED
+    GET_VAR(entry_, '*SYSTEM*', sock_.cfg_str + '.$STATE', sock_.stat, stat_)
+    IF (stat_ <> 0) OR (sock_.stat <> STAT_DEF) THEN
+        -- TAG config not correct, or couldn't read it
+        RETURN (TAG_CONF_ERR)
+    ENDIF
+
+    -- set port_ of TAG
+    SET_VAR(entry_, '*SYSTEM*', sock_.cfg_str + '.$SERVER_PORT', sock_.port, sock_.stat)
+    IF sock_.stat <> 0 THEN
+        -- couldn't update TAG config
+        RETURN (TAG_CONF_ERR)
+    ENDIF
+    -- done
+    RETURN (sock_.stat)
+END csock_def
+----------------------------------------------------
+ROUTINE sock_accept --(sock_ : type_sock) : INTEGER 
+VAR
+    stat_ : INTEGER
+BEGIN
+    stat_ = 0
+    IF sock_.connected THEN
+        RETURN (S_ACPT_ERR)
+    ENDIF
+    -- make sure socket is closed
+    stat_ = sock_disco(sock_)
+    -- msg_connect only returns after a client connects to the port
+    MSG_CONNECT(sock_.idx_str, stat_)
+
+    IF stat_ = 0 THEN
+        sock_.connected = TRUE
+    ENDIF
+
+    RETURN (stat_)
+END sock_accept 
+--------------------------------------------------------
+ROUTINE sock_accept2--(sock_ : type_sock; f_ : FILE) : INTEGER 
+VAR
+    stat_ : INTEGER
+BEGIN
+    stat_ = 0
+    -- use other routine
+    stat_ = sock_accept(sock_)
+
+    -- make sure it succeeded
+    IF stat_ <> 0 THEN
+        -- stat already <> 0 from ssock_accept
+        RETURN (stat_)
+    ENDIF
+
+    -- now open fd, read / write
+    stat_ = sock_opnfile(sock_, f_, 'RW')
+    -- done (stat already < 0 from ssock_ofd)
+    RETURN (stat_)
+END sock_accept2
+----------------------------------------------------
+ROUTINE sock_disco--(sock_ : type_sock) : INTEGER 
+VAR
+    stat_ : INTEGER
+BEGIN
+    stat_ = 0
+    MSG_DISCO(sock_.idx_str, stat_)
+
+    sock_.connected = FALSE
+
+    RETURN (-stat_)
+END sock_disco
+--------------------------------------------------------
+ROUTINE sock_disco2--(sock_ : type_sock; f_ : FILE) : INTEGER
+VAR
+    stat_ : INTEGER
+BEGIN
+    stat_ = 0
+    IF sock_.connected = FALSE THEN
+        RETURN (S_NOTCON_ERR)
+    ENDIF
+    -- close fd first
+    -- TODO: fail on failure to close fd?
+    stat_ = sock_clsfile(sock_, f_)
+    -- now socket
+    MSG_DISCO(sock_.idx_str, stat_)
+
+    sock_.connected = FALSE
+
+    -- done
+    RETURN (-stat_)
+END sock_disco2
+--------------------------------------------------------
+ROUTINE sock_discof --(sock_ : type_sock) : INTEGER FROM socklib
+VAR
+    lStat : INTEGER
+BEGIN
+    lStat = 0
+    MSG_DISCO(sock_.idx_str, lStat)
+
+    sock_.connected = FALSE
+
+    RETURN (-lStat)
+END sock_discof
+--------------------------------------------------------
+ROUTINE sock_opnfile--(sock_ : type_sock; f_ : FILE; mode_ : STRING) : INTEGER
+VAR
+    s_  : STRING[3]
+    stat_ : INTEGER
+BEGIN
+    IF sock_.connected = FALSE THEN
+        RETURN (S_NOTCON_ERR)
+    ENDIF
+    s_ = sock_.idx_str
+    SET_FILE_ATR(f_,ATR_BUFSIZE,BUF_SIZE)
+    SET_FILE_ATR(f_,ATR_FIELD) --for reading
+    SET_FILE_ATR(f_,ATR_IA) --for writing
+    OPEN FILE f_(mode_, s_)
+    stat_ = IO_STATUS(f_)
+    RETURN (stat_)
+END sock_opnfile
+--------------------------------------------------------
+ROUTINE sock_clsfile--(sock_ : type_sock; f_ : FILE) : INTEGER
+VAR
+    stat_ : INTEGER
+BEGIN
+    IF sock_.connected = FALSE THEN
+        RETURN (S_NOTCON_ERR)
+    ENDIF
+
+    -- close file desc
+    CLOSE FILE f_
+
+    -- according to Karel Ref Man, A.4.12, this will always return 0
+    stat_ = IO_STATUS(f_)
+    RETURN (stat_)
+END sock_clsfile
+--------------------------------------------------------
+ROUTINE sock_dump--(sock_ : type_sock; f_ : FILE)
+BEGIN
+    WRITE f_('Sock instance:', CR, &
+            ' connected :', sock_.connected, CR, &
+            ' port      :', sock_.port, CR, &
+            ' tag_idx   :', sock_.idx, CR, &
+            ' tag_str   : ', sock_.idx_str, CR, &
+            ' hcfg_str  : ', sock_.cfg_str, CR)
+END sock_dump
+----------------------------------------------------
+ROUTINE sock_get_buff--(f_ : FILE) : INTEGER
+VAR
+    stat_      : INTEGER
+    bytes_ahd_ : INTEGER
+BEGIN
+
+    bytes_ahd_  = 0
+    stat_       = 0
+
+    -- check nr of bytes in buffer
+    BYTES_AHEAD(f_, bytes_ahd_, stat_)
+    
+    IF (stat_ = 0) THEN RETURN(bytes_ahd_);ENDIF 
+    RETURN(-stat_)
+END sock_get_buff

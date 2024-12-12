@@ -1,0 +1,43 @@
+
+---------------------------------------------------
+-- Creation date: 2020.06.02
+-- Created by: MK
+----------------------------------------------------
+-- Version: 0.0.1.0 - 00
+----------------------------------------------------
+-- Function: Routine protoypes for socklib
+--           Socket server
+----------------------------------------------------
+-- Last modified: 2020.06.02
+-- Last modified by:                              
+----------------------------------------------------
+--------------------------------------------------------
+ROUTINE sock_ping(host_ : STRING) : INTEGER FROM socklib
+----------------------------------------------------
+ROUTINE ssock_def(sock_ : type_sock; port_ : INTEGER; idx_ : INTEGER) : INTEGER FROM socklib 
+----------------------------------------------------
+ROUTINE csock_def(sock_ : type_sock; port_ : INTEGER; idx_ : INTEGER) : INTEGER FROM socklib
+----------------------------------------------------
+ROUTINE sock_accept(sock_ : type_sock) : INTEGER  FROM socklib
+----------------------------------------------------
+ROUTINE sock_accept2(sock_ : type_sock; f_ : FILE) : INTEGER FROM socklib
+----------------------------------------------------
+-- Disconnect the socket, if connected.
+ROUTINE sock_disco(sock_ : type_sock) : INTEGER  FROM socklib
+----------------------------------------------------
+-- Disconnect the socket, if connected. Then close given file descriptor.
+ROUTINE sock_disco2(sock_ : type_sock; f_ : FILE) : INTEGER FROM socklib
+----------------------------------------------------
+-- Disconnect the socket, unconditionally.
+ROUTINE sock_discof(sock_ : type_sock) : INTEGER FROM socklib
+----------------------------------------------------
+-- Open a file descriptor on the given socket instance
+ROUTINE sock_opnfile(sock_ : type_sock; f_ : FILE; mode_ : STRING) : INTEGER FROM socklib
+----------------------------------------------------
+-- Close the given file descriptor (on the given socket instance)
+ROUTINE sock_clsfile(sock_ : type_sock; f_ : FILE) : INTEGER FROM socklib
+----------------------------------------------------
+-- Dump string rep of the given instance to to file descriptor 'fd'.
+ROUTINE sock_dump(sock_ : type_sock; f_ : FILE) FROM socklib
+-----------------------------------------------------
+ROUTINE sock_get_buff(f_ : FILE) : INTEGER FROM socklib
