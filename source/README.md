@@ -5,9 +5,9 @@ ROUTINES LIST: 2020-05-25 10:35:45
 ----------------------------------------------------
 -- TP DISP                             
 ----------------------------------------------------
-ROUTINE ForceMenu(menu_id:INTEGER) FROM utilitylib
+ROUTINE ForceMenu(menu_id_:INTEGER) FROM utilitylib
 ----------------------------------------------------
-ROUTINE ClearTpDev(dispid:FILE) FROM utilitylib
+ROUTINE ClearTpDev(dispid_:FILE) FROM utilitylib
 ----------------------------------------------------
 ROUTINE ForceUser FROM utilitylib
 ----------------------------------------------------
@@ -35,15 +35,15 @@ ROUTINE PostErr(message:STRING;prio:INTEGER) FROM utilitylib
 ----------------------------------------------------
 --   File
 ----------------------------------------------------
-ROUTINE OpenFile(in_file:FILE; file_path:STRING; method:INTEGER):BOOLEAN FROM utilitylib
+ROUTINE OpenFile(f_:FILE; file_path:STRING; method:INTEGER):BOOLEAN FROM utilitylib
 ---------------------------------------------------
-ROUTINE CloseFile(in_file:FILE):BOOLEAN FROM utilitylib 
+ROUTINE CloseFile(f_:FILE):BOOLEAN FROM utilitylib 
 ----------------------------------------------------
 ROUTINE Getline(lFile:FILE;lLine:STRING) : BOOLEAN FROM utilitylib
 ----------------------------------------------------
 -- LOG                            
 ----------------------------------------------------
-ROUTINE LogPip(in_file:FILE;file_name:STRING;in_string:STRING) FROM utilitylib
+ROUTINE LogPip(f_:FILE;file_name:STRING;in_string:STRING) FROM utilitylib
 -----------------------------------------------------
 --  Time
 -----------------------------------------------------
@@ -51,9 +51,9 @@ ROUTINE GetSysTimeStr :STRING FROM utilitylib
 ----------------------------------------------------
 -- Sring Handling                             
 ----------------------------------------------------
-ROUTINE IntToString(num:INTEGER) : STRING FROM utilitylib
+ROUTINE int2str(num:INTEGER) : STRING FROM utilitylib
 ----------------------------------------------------
-ROUTINE RealToString(num:REAL) : STRING FROM utilitylib
+ROUTINE real2str(num:REAL) : STRING FROM utilitylib
 ----------------------------------------------------
 ROUTINE IntParse(str:STRING,stat:INTEGER):INTEGER  FROM utilitylib 
 ----------------------------------------------------

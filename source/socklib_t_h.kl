@@ -33,4 +33,5 @@ CONST
     STAT_UNDF    =  1 
     STAT_DEF     =  2 
     STAT_START   =  3 
+    BUF_SIZE     = 512
 

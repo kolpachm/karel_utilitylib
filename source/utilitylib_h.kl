@@ -12,9 +12,9 @@
 ----------------------------------------------------
 -- TP DISP                             
 ----------------------------------------------------
-ROUTINE ForceMenu(menu_id:INTEGER) FROM utilitylib
+ROUTINE ForceMenu(menu_id_:INTEGER) FROM utilitylib
 ----------------------------------------------------
-ROUTINE ClearTpDev(dispid:FILE) FROM utilitylib
+ROUTINE ClearTpDev(dispid_:FILE) FROM utilitylib
 ----------------------------------------------------
 ROUTINE ForceUser FROM utilitylib
 ----------------------------------------------------
@@ -25,33 +25,36 @@ ROUTINE ClearErr FROM utilitylib
 -- SYS VARS                             
 ----------------------------------------------------
 -- This routine gets BOOLEAN type system variable and check operation status
-ROUTINE GetSysB(varname: STRING): BOOLEAN FROM utilitylib
+ROUTINE GetSysB(varname_: STRING): BOOLEAN FROM utilitylib
 ----------------------------------------------------------
 -- This routine gets INTEGER type system variable and check operation status
-ROUTINE GetSysI(varname: STRING): INTEGER FROM utilitylib
+ROUTINE GetSysI(varname_: STRING): INTEGER FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetSysS(varname_: STRING): STRING FROM utilitylib
 ----------------------------------------------------------
 -- This routine sets BOOLEAN type system variable and check operation status
-ROUTINE SetSysB(varname: STRING; value: BOOLEAN) FROM utilitylib
+ROUTINE SetSysB(varname_: STRING; val_: BOOLEAN) FROM utilitylib
 ----------------------------------------------------------
 -- This routine sets INTEGER type system variable and check operation status
-ROUTINE SetSysI(varname: STRING; value: INTEGER) FROM utilitylib
+ROUTINE SetSysI(varname_: STRING; val_: INTEGER) FROM utilitylib
 ----------------------------------------------------
 -- ERR Handling                             
 ----------------------------------------------------
-ROUTINE PostErrTxt(message:STRING) FROM utilitylib
-ROUTINE PostErr(code:INTEGER;message:STRING;prio:INTEGER) FROM utilitylib
+ROUTINE PostErrTxt(msg_:STRING) FROM utilitylib
+ROUTINE chk_stat(stat_:INTEGER;msg_:STRING;severity_:INTEGER;debug_:BOOLEAN) FROM utilitylib
 ----------------------------------------------------
 --   File
 ----------------------------------------------------
-ROUTINE OpenFile(in_file:FILE; file_path:STRING; method:INTEGER):BOOLEAN FROM utilitylib
+ROUTINE OpenFile(f_:FILE; fpath_:STRING; method:INTEGER):BOOLEAN FROM utilitylib
 ---------------------------------------------------
-ROUTINE CloseFile(in_file:FILE):BOOLEAN FROM utilitylib 
+ROUTINE CloseFile(f_:FILE):BOOLEAN FROM utilitylib 
 ----------------------------------------------------
-ROUTINE Getline(lFile:FILE;lLine:STRING) : BOOLEAN FROM utilitylib
+ROUTINE Getline(f_:FILE;line_:STRING) : BOOLEAN FROM utilitylib
 ----------------------------------------------------
 -- LOG                            
 ----------------------------------------------------
-ROUTINE LogPip(in_file:FILE;file_name:STRING;in_string:STRING) FROM utilitylib
+ROUTINE log_pip(f_:FILE;fpath_:STRING;msg_:STRING;pip_cfg_:BOOLEAN) FROM utilitylib
+ROUTINE log_msg(msg_:STRING) FROM utilitylib
 -----------------------------------------------------
 --  Time
 -----------------------------------------------------
@@ -59,9 +62,13 @@ ROUTINE GetSysTimeStr :STRING FROM utilitylib
 ----------------------------------------------------
 -- Sring Handling                             
 ----------------------------------------------------
-ROUTINE IntToString(num:INTEGER) : STRING FROM utilitylib
+ROUTINE int2str(num_:INTEGER) : STRING FROM utilitylib
 ----------------------------------------------------
-ROUTINE RealToString(num:REAL) : STRING FROM utilitylib
+ROUTINE real2str(num_:REAL) : STRING FROM utilitylib
+----------------------------------------------------
+ROUTINE real2Str2(num_:REAL;precs_:INTEGER) : STRING FROM utilitylib
+----------------------------------------------------
+ROUTINE bool2str(bool2cnv_:BOOLEAN) : STRING FROM utilitylib
 ----------------------------------------------------
 ROUTINE IntParse(str:STRING;stat:INTEGER):INTEGER  FROM utilitylib 
 ----------------------------------------------------
@@ -71,41 +78,58 @@ ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;c
 ----------------------------------------------------
 routine ToUpper(p_char: integer): string FROM utilitylib
 ----------------------------------------------------
+ROUTINE ToLower(str_: string): string FROM utilitylib
 --  Dig Ports
 ----------------------------------------------------
 ROUTINE GetMaxIO :INTEGER FROM utilitylib
 ----------------------------------------------------
 ROUTINE GetMaxFLG :INTEGER FROM utilitylib
 ----------------------------------------------------
+ROUTINE set_flg(port_: INTEGER; val_: BOOLEAN) FROM utilitylib
+----------------------------------------------------
+ROUTINE Get_Din (port_:INTEGER):BOOLEAN FROM utilitylib
+----------------------------------------------------
+ROUTINE Get_Dout(port_:INTEGER):BOOLEAN FROM utilitylib
+----------------------------------------------------
+ROUTINE Get_Gin (port_:INTEGER):INTEGER FROM utilitylib
+----------------------------------------------------
+ROUTINE Set_Dout(port_:INTEGER; val_:BOOLEAN) FROM utilitylib
+----------------------------------------------------
+ROUTINE Set_Gout(port_:INTEGER; val_:INTEGER) FROM utilitylib
+----------------------------------------------------
 --  TPP ARGUMENTS
 ----------------------------------------------------
-ROUTINE GetIntArg(idx:INTEGER):INTEGER FROM utilitylib 
+ROUTINE GetIntArg(idx_:INTEGER):INTEGER FROM utilitylib 
 ----------------------------------------------------
-ROUTINE GetRealArg(idx:INTEGER):REAL FROM utilitylib
+ROUTINE GetRealArg(idx_:INTEGER):REAL FROM utilitylib
 ----------------------------------------------------
-ROUTINE GetStrArg(idx:INTEGER):STRING FROM utilitylib 
+ROUTINE GetStrArg(idx_:INTEGER):STRING FROM utilitylib 
 ----------------------------------------------------
 --  Registers
 ----------------------------------------------------
-ROUTINE GetRealReg(regno:INTEGER):REAL FROM utilitylib 
+ROUTINE GetRealReg(reg_idx_:INTEGER):REAL FROM utilitylib 
 ---------------------------------------------------------
-ROUTINE GetIntReg(regno:INTEGER):INTEGER FROM utilitylib 
+ROUTINE GetRealRegChk(reg_idx_:INTEGER):REAL FROM utilitylib
+---------------------------------------------------------
+ROUTINE GetIntReg(reg_idx_:INTEGER):INTEGER FROM utilitylib 
+---------------------------------------------------------
+ROUTINE GetIntRegChk(reg_idx_:INTEGER):INTEGER FROM utilitylib
 ---------------------------------------------------------
 ROUTINE GetMaxReg :INTEGER FROM utilitylib
 ---------------------------------------------------------
 ROUTINE GetMaxPReg :INTEGER FROM utilitylib
 ---------------------------------------------------------
-ROUTINE GetPosReg(idx:INTEGER):XYZWPR FROM utilitylib  
+ROUTINE GetPosReg(idx_:INTEGER):XYZWPR FROM utilitylib  
 ---------------------------------------------------------
-ROUTINE SetPosReg(idx:INTEGER;in_pos:XYZWPR) FROM utilitylib 
+ROUTINE SetPosReg(idx_:INTEGER;in_pos:XYZWPR) FROM utilitylib 
 ---------------------------------------------------------
-ROUTINE GetStrReg(idx:INTEGER):STRING FROM utilitylib  
+ROUTINE GetStrReg(idx_:INTEGER):STRING FROM utilitylib  
 ----------------------------------------------------
 --  Math
 ----------------------------------------------------
-ROUTINE POW(base:REAL;exponent:INTEGER):REAL FROM utilitylib 
+ROUTINE POW(base_:REAL;exp_:INTEGER):REAL FROM utilitylib 
 ----------------------------------------------------
-ROUTINE Dec2Bin(input:INTEGER;output:ARRAY OF BOOLEAN) FROM utilitylib
+ROUTINE Dec2Bin(in_:INTEGER;out_:ARRAY OF BOOLEAN) FROM utilitylib
 ----------------------------------------------------
 -- This function routine is a random number generator
 -- [IN] : seed
@@ -141,10 +165,39 @@ ROUTINE TPForceWide :STRING FROM utilitylib
 ----------------------------------------------------
 --  FRAME/TOOL 
 ----------------------------------------------------
-ROUTINE GetUFrame(inUFrame:INTEGER;outPosition:POSITION) FROM utilitylib
+ROUTINE GetMaxUTool:INTEGER FROM utilitylib
+----------------------------------------------------
+ROUTINE GetMaxUFrame:INTEGER FROM utilitylib
+----------------------------------------------------
+ROUTINE GetUFrame(uf_num_:INTEGER):POSITION FROM utilitylib
 ----------------------------------------------------------
-ROUTINE GetUTool(inUTool:INTEGER;outPosition:POSITION) FROM utilitylib
+ROUTINE GetUTool(ut_num_:INTEGER):POSITION FROM utilitylib
+----------------------------------------------------------
+ROUTINE SetUTool(tool_nr_:INTEGER;pos_:POSITION) FROM utilitylib
+----------------------------------------------------------
+ROUTINE SetUFrame (frame_nr_:INTEGER;pos_:POSITION) FROM utilitylib
+----------------------------------------------------------
+ROUTINE SetActToolNum (tool_nr_:INTEGER) FROM utilitylib
+----------------------------------------------------------
+ROUTINE SetActFrameNum (frame_nr_:INTEGER) FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetFrameDataPos(base_nr_:INTEGER):POSITION FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetToolDataPos(tool_nr_:INTEGER):POSITION FROM utilitylib
 ----------------------------------------------------------
 --Position 
 ----------------------------------------------------------
-ROUTINE SetConf(confstr:STRING):CONFIG FROM utilitylib
+ROUTINE SetConf(cnf_str_:STRING):CONFIG FROM utilitylib
+----------------------------------------------------------
+ROUTINE InitPosNull(pos_:XYZWPREXT) FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetPosCur(tool_nr_:INTEGER;frame_nr_:INTEGER):XYZWPR FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetPosCur2(tool_:POSITION;fame_:POSITION):XYZWPREXT FROM utilitylib
+----------------------------------------------------------
+ROUTINE GetNullPos :POSITION FROM utilitylib
+----------------------------------------------------
+-- Interface
+----------------------------------------------------
+ROUTINE GetOpMode :INTEGER FROM utilitylib
+----------------------------------------------------
