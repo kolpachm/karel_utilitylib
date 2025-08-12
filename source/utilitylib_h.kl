@@ -109,11 +109,11 @@ ROUTINE GetStrArg(idx_:INTEGER):STRING FROM utilitylib
 ----------------------------------------------------
 ROUTINE GetRealReg(reg_idx_:INTEGER):REAL FROM utilitylib 
 ---------------------------------------------------------
-ROUTINE GetRealRegChk(reg_idx_:INTEGER):REAL FROM utilitylib
+ROUTINE GetRealReg2(reg_idx_:INTEGER):REAL FROM utilitylib
 ---------------------------------------------------------
 ROUTINE GetIntReg(reg_idx_:INTEGER):INTEGER FROM utilitylib 
 ---------------------------------------------------------
-ROUTINE GetIntRegChk(reg_idx_:INTEGER):INTEGER FROM utilitylib
+ROUTINE GetIntReg2(reg_idx_:INTEGER):INTEGER FROM utilitylib
 ---------------------------------------------------------
 ROUTINE GetMaxReg :INTEGER FROM utilitylib
 ---------------------------------------------------------

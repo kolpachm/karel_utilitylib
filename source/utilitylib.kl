@@ -4,6 +4,7 @@ PROGRAM utilitylib
 -- Created by: MKOL
 ----------------------------------------------------
 -- Version: 0.1.0.4 
+--2025-08-12 10:47:14 - version 2.1
 ----------------------------------------------------
 -- Function: Common Utility Routines
 ----------------------------------------------------
@@ -11,9 +12,9 @@ PROGRAM utilitylib
 -- Last modified by: MKOL                             
 -- 2020-06-04 20:39:37: RealParse added
 -- 2024-12-12 14:30:08 - major modificantions
---
+-- 2025-08-12 10:46:21 - improved GetRealReg/GetIntReg
 ----------------------------------------------------
-%COMMENT = 'v2.0'
+%COMMENT = 'v2.1'
 %NOPAUSE = ERROR+COMMAND+TPENABLE
 %NOLOCKGROUP
 -- %INCLUDE KLEVKEYS
@@ -422,14 +423,14 @@ ROUTINE SplitStr --(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRIN
 
 END SplitStr
 ----------------------------------------------------
-routine toupper --(p_char: integer): string
+routine ToUpper --(p_char: integer): string
 
 begin
   if (p_char > 96) and (p_char < 123) then
     p_char = p_char - 32
   endif
   return (chr(p_char))
-end toupper
+end ToUpper
 ----------------------------------------------------
 ROUTINE ToLower --(str_: sting): string
 VAR
@@ -626,61 +627,65 @@ END GetStrArg
 ----------------------------------------------------
 ROUTINE GetRealReg --(reg_idx_:INTEGER):REAL
 --GET_REG(register_no, real_flag, int_value, real_value, status)
+--checking reg_idx_ range
 VAR 
   real_flg_     :BOOLEAN
-  int_val_       :INTEGER 
-  real_val_      :REAL  
+  int_val_      :INTEGER 
+  real_val_     :REAL  
   stat_         :INTEGER 
 BEGIN 
   GET_REG(reg_idx_,real_flg_,int_val_,real_val_,stat_) 
-  chk_stat(stat_,'Err reading RealReg.',2,FALSE) 
+  chk_stat(stat_,'Err Reading Reg[' + int2str(reg_idx_) + ']',2,FALSE) 
   IF (NOT(real_flg_))THEN 
     real_val_ = int_val_
   ENDIF
   RETURN(real_val_)  
 END GetRealReg --(reg_idx_:INTEGER) 
 ---------------------------------------------------------
-ROUTINE GetRealRegChk --(reg_idx_:INTEGER):REAL
+ROUTINE GetRealReg2 --(reg_idx_:INTEGER):REAL
 --GET_REG(register_no, real_flag, int_value, real_value, status)
---check if idx_ is valid
+--!WARNING - does not check reg_idx_ range
+-- returns 0 if reg_idx_ is invalid
 VAR 
   real_flg_     :BOOLEAN
-  int_val_       :INTEGER 
-  real_val_      :REAL  
+  int_val_      :INTEGER 
+  real_val_     :REAL  
   stat_         :INTEGER 
 BEGIN 
-IF (reg_idx_ >= 1) AND (reg_idx_ <= GetMaxReg) THEN
+
   GET_REG(reg_idx_,real_flg_,int_val_,real_val_,stat_) 
-  chk_stat(stat_,'Err reading RealReg.',2,FALSE) 
+  -- posts varning only
+  chk_stat(stat_,'RealReg[' + int2str(reg_idx_) + '] not valid!',0,FALSE) 
+  IF (stat_ <> 0) THEN
+    int_val_ = 0
+    real_flg_ = FALSE
+  ENDIF
   IF (NOT(real_flg_))THEN 
     real_val_ = int_val_
   ENDIF
   RETURN(real_val_)
-ELSE
-  chk_stat(E_OUTOFRANGE,'Var out of range: R Num',2,FALSE)
-  RETURN(real_val_)
-ENDIF
-END GetRealRegChk --(reg_idx_:INTEGER) 
+END GetRealReg2 --(reg_idx_:INTEGER) 
 ---------------------------------------------------------
 ROUTINE GetIntReg --(reg_idx_:INTEGER):INTEGER 
+--checking reg_idx_ range
+-- checking value type
 VAR 
   real_flg_      :BOOLEAN
-  int_val_        :INTEGER 
-  real_val_       :REAL  
+  int_val_       :INTEGER 
+  real_val_      :REAL  
   stat_          :INTEGER 
 BEGIN 
   GET_REG(reg_idx_,real_flg_,int_val_,real_val_,stat_)
-  chk_stat(stat_,'Err reading IntReg',2,FALSE)
-  IF(NOT(real_flg_)) THEN 
-    RETURN(int_val_)
-  ELSE
+  chk_stat(stat_,'Err reading Reg[' + int2str(reg_idx_) + ']',2,FALSE)
+  IF(real_flg_) THEN 
     stat_ = E_BADTYPE
-    chk_stat(stat_,'Err reading IntReg or R val',0,FALSE)
-    RETURN(TRUNC(real_val_))
+    chk_stat(stat_,'Err reading Reg[' + int2str(reg_idx_) + '] - bad type',2,FALSE)
   ENDIF
+  RETURN(int_val_)
 END GetIntReg
 ---------------------------------------------------------
-ROUTINE GetIntRegChk --(reg_idx_:INTEGER):INTEGER 
+ROUTINE GetIntReg2 --(reg_idx_:INTEGER):INTEGER 
+-- no type check returned value is truncated
 VAR 
   real_flg_      :BOOLEAN
   int_val_        :INTEGER 
@@ -694,8 +699,9 @@ BEGIN
   ELSE
       stat_ = E_BADTYPE
       chk_stat(stat_,'Err reading IntReg or R val',0,FALSE)
+      RETURN(TRUNC(real_val_))
   ENDIF
-END GetIntRegChk
+END GetIntReg2
 ---------------------------------------------------------
 ROUTINE GetMaxReg --:INTEGER
 VAR 
