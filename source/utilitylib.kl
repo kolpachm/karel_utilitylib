@@ -4,7 +4,8 @@ PROGRAM utilitylib
 -- Created by: MKOL
 ----------------------------------------------------
 -- Version: 0.1.0.4 
---2025-08-12 10:47:14 - version 2.1
+-- version 2.1.0 -2025-08-12 10:47:14 -
+--         2.1.1  added ToUpper2 routine
 ----------------------------------------------------
 -- Function: Common Utility Routines
 ----------------------------------------------------
@@ -431,6 +432,25 @@ begin
   endif
   return (chr(p_char))
 end ToUpper
+----------------------------------------------------
+ROUTINE ToUpper2 --(str_:STRING): string
+VAR
+    p_char_ :INTEGER
+    s_      :STRING[128]
+    i_      :INTEGER
+BEGIN
+  s_ = ''
+  FOR i_=1 TO STR_LEN[(str_) DO
+    p_char_ = ORD(str_,i_)
+    IF (p_char_ > 96) AND (p_char_ < 123) THEN
+        p_char_ = p_char_ - 32
+        s_ = s_ + CHR(p_char_)
+    ELSE
+        s_ = s_ + CHR(p_char_)
+    ENDIF
+  ENDFOR
+  RETURN (s_)
+END ToUpper2
 ----------------------------------------------------
 ROUTINE ToLower --(str_: sting): string
 VAR

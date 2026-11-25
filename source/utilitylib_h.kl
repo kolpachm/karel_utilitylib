@@ -2,11 +2,13 @@
 -- Creation date: 2020.05.21
 -- Created by: MKOL
 ----------------------------------------------------
--- Version: 0.0.0.0 - 00
+-- Version: 1.0.0 - release
+--          2.1.0 -2025-08-12 10:47:14 -
+--          2.1.1 - added ToUpper2 routine - 2026-08-04 14:30:47
 ----------------------------------------------------
 -- Function: Interface to Karel Utility Library, Routines
 ----------------------------------------------------
--- Last modified: 2020.05.21
+-- Last modified: 2026-08-04 14:30:32
 -- Last modified by: MKOL                           
 ----------------------------------------------------
 ----------------------------------------------------
@@ -77,6 +79,8 @@ ROUTINE RealParse(str:STRING;stat:INTEGER):REAL FROM utilitylib
 ROUTINE SplitStr(separator:STRING;in_string:STRING;out_str_ary:ARRAY OF STRING;cmd_size:INTEGER;l_stat:INTEGER) FROM utilitylib
 ----------------------------------------------------
 routine ToUpper(p_char: integer): string FROM utilitylib
+----------------------------------------------------
+ROUTINE ToUpper2 (str_:STRING): string FROM utilitylib
 ----------------------------------------------------
 ROUTINE ToLower(str_: string): string FROM utilitylib
 --  Dig Ports

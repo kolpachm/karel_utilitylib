@@ -1,0 +1,182 @@
+PROGRAM user_log
+----------------------------------------------------
+-- Creation date: 2026.03.06
+-- Created by: msk
+----------------------------------------------------
+-- Version: 1.0
+----------------------------------------------------
+-- Function: log message from TP to userscreen
+----------------------------------------------------
+-- Last modified: 2026.03.06
+-- Last modified by: msk
+----------------------------------------------------
+%COMMENT = '1.0'
+%ALPHABETIZE
+%INCLUDE KLEVKEYS
+%INCLUDE KLEVKMSK
+%INCLUDE KLEVCCDF
+%INCLUDE KLIOUOP
+%INCLUDE KLIOTYPS
+CONST
+TYP_STRING = 3 
+VAR
+message_ : STRING[254]
+----------------------------------------------------
+-- BEGIN routines
+----------------------------------------------------
+ROUTINE chk_stat(stat_:INTEGER;msg_:STRING;severity_:INTEGER;debug_:BOOLEAN) FROM user_log
+ROUTINE GetStrArg(idx_:INTEGER):STRING FROM user_log
+ROUTINE GetSysTimeStr : STRING FROM user_log
+ROUTINE int2str(num_:INTEGER) : STRING FROM user_log
+ROUTINE real2str(num_:REAL) : STRING FROM user_log
+ROUTINE log_msg(msg_:STRING) FROM user_log
+ROUTINE PostErrTxt(msg_:STRING) FROM user_log
+----------------------------------------------------
+-- BEGIN log_msg
+----------------------------------------------------
+BEGIN
+    message_ = GetStrArg(1)
+    log_msg(message_)
+END user_log
+----------------------------------------------------
+-- This routine writes log msg_ to user screen
+ROUTINE log_msg--(msg_:STRING)
+CONST 
+  TM_PLACEH = '         '
+VAR
+  time_str_  : STRING[9]
+  msg_split_ : ARRAY[9] OF STRING[31] --
+  -- max char pre USER screen line is 9(time) + 31(text) = 40
+  split_div_  : INTEGER
+  split_mod_ : INTEGER
+  i_         : INTEGER
+BEGIN
+  split_div_ = STR_LEN(msg_) DIV 31
+  split_mod_ = STR_LEN(msg_) MOD 31
+  time_str_ = SUB_STR(GetSysTimeStr,11,8)
+  time_str_ = time_str_ + ':'
+  IF (split_div_ < 1) THEN 
+    WRITE TPDISPLAY(CR,time_str_,msg_)
+    RETURN 
+  ENDIF 
+  FOR i_ = 1 TO split_div_ DO
+    msg_split_[i_] = SUB_STR(msg_,(i_-1)*31+1,31)
+  ENDFOR
+  IF (split_mod_ > 0) THEN
+    msg_split_[split_div_+1] = SUB_STR(msg_,split_div_*31+1,split_mod_)
+  ENDIF 
+  FOR i_ = 1 TO split_div_ DO
+    IF (i_ = 1) THEN
+      WRITE TPDISPLAY(CR,time_str_,msg_split_[i_])
+    ELSE
+      WRITE TPDISPLAY(CR,TM_PLACEH,msg_split_[i_])
+    ENDIF
+  ENDFOR
+  IF (split_mod_ > 0) THEN
+    WRITE TPDISPLAY(CR,TM_PLACEH,msg_split_[split_div_+1])
+  ENDIF
+END log_msg
+----------------------------------------------------
+-----------------------------------------------------
+ROUTINE GetSysTimeStr  --  :STRING
+
+VAR
+time_int          :INTEGER
+time_str          :STRING[32]
+secondsI          :INTEGER
+secondsS          :STRING[4]
+
+BEGIN
+  GET_TIME(time_int)
+  CNV_TIME_STR(time_int,time_str)
+  --chop off trailing 
+  time_str = SUB_STR(time_str,1,15)
+  time_str = time_str +':'
+  --seconds part bits 0-4 => 11111 = 31
+  secondsI = time_int AND 31
+  --seconds are stored in 2-sec intervals
+  secondsI = 2*secondsI
+  secondsS = int2str(secondsI)
+  IF (secondsI < 10) THEN
+    secondsS = '0' + secondsS
+  ENDIF
+
+  RETURN(time_str + secondsS)
+
+END GetSysTimeStr
+----------------------------------------------------
+ROUTINE int2str --(num_:INTEGER) : STRING
+VAR 
+  s_     :STRING[16]
+BEGIN
+  CNV_INT_STR(num_, 0, 0, s_) -- Convert integer to string
+  s_ = SUB_STR(s_,2,STR_LEN(s_)) -- Remove leading blank character
+  RETURN (s_)
+END int2str 
+----------------------------------------------------
+----------------------------------------------------
+ROUTINE real2str  --(num_:REAL) : STRING
+VAR 
+  s_ :STRING[16] 
+BEGIN 
+  CNV_REAL_STR(num_,0,3,s_)--convert real to srting 
+  s_ = SUB_STR(s_,2,STR_LEN(s_)) -- Remove leading blank character
+  RETURN(s_)
+END real2str 
+----------------------------------------------------
+ROUTINE GetStrArg--(idx_:INTEGER):STRING FROM  
+VAR 
+ret_val_       :STRING[32]
+stat_         :INTEGER 
+val_type_      :INTEGER   
+i_      :INTEGER 
+r_     :REAL 
+s_      :STRING[32] 
+
+BEGIN 
+  GET_TPE_PRM(idx_,val_type_,i_,r_,s_,stat_) 
+  IF (stat_ = 0) THEN 
+    IF (val_type_ = TYP_STRING) THEN 
+      ret_val_ = s_ 
+    ELSE 
+      chk_stat(16060,'Get TPE Real: Bad type',2,FALSE)
+    ENDIF 
+  ELSE 
+    chk_stat(stat_,'Err getting TPP Arg: ' + int2str(idx_),2,FALSE)
+  ENDIF 
+  RETURN(ret_val_) 
+END GetStrArg
+
+----------------------------------------------------
+----------------------------------------------------
+ROUTINE chk_stat--(stat_:INTEGER;msg_:STRING;severity_:INTEGER,debug_:BOOLEAN)
+BEGIN
+  IF stat_ <> 0 THEN
+    if uninit(debug_) then debug_ = FALSE; endif
+    IF debug_ THEN
+      POST_ERR(stat_,'',0,0); PAUSE
+      PostErrTxt(msg_)
+    ELSE 
+      log_msg(msg_)
+      POST_ERR(stat_,'',0,severity_) 
+    ENDIF
+  ENDIF
+END chk_stat
+----------------------------------------------------
+----------------------------------------------------
+ROUTINE PostErrTxt --(msg_:STRING)
+VAR 
+  msg_len_ : INTEGER
+  tmp_str_ : STRING[40]
+BEGIN 
+  --max len for TPERR = 40 chars
+  WRITE TPERROR(CHR(128),CHR(137))
+  msg_len_ = STR_LEN(msg_)
+  IF (msg_len_ > 40) THEN
+    tmp_str_ = SUB_STR(msg_,1,39)
+    tmp_str_ = tmp_str_ + '>' --indicate msg_ is truncated
+    WRITE TPERROR(tmp_str_,CR)
+  ELSE
+    WRITE TPERROR(msg_,CR)
+  ENDIF
+END PostErrTxt
